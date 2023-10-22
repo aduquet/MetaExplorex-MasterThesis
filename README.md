@@ -10,7 +10,7 @@ MetaExploreX is a tool for visualising and exploring the results of metamorphic 
 
 ## Getting Started
 
-To use MetaExploreX, simply download the latest version from the releases page and install it on your local machine. Once installed, you can launch the tool and load the results of your metamorphic testing project.
+To use MetaExploreX, bla bla bla
 
 ## Usage
 
