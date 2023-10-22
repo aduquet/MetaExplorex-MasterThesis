@@ -4,7 +4,7 @@ MetaExploreX is a tool for visualising and exploring the results of metamorphic 
 
 ## Features
 
-- Visualization of metamorphic testing results: MetaExploreX provides a clear and intuitive visual representation of the results of metamorphic testing, allowing users to quickly identify patterns and trends in the data.
+- Visualization of metamorphic testing results: MetaExploreX provides a clear and intuitive visual representation of the results of metamorphic testing, allowing users to identify patterns and trends in the data quickly.
 
 - Navigation through test cases: With MetaExploreX, users can easily navigate through different test cases and explore specific examples where metamorphic rules were either violated or not violated.
 
@@ -30,17 +30,6 @@ Contributions to MetaExploreX are welcome! If you have an idea for a new feature
 
 ## Contact
 
-If you have any questions or comments about MetaExploreX, please contact us at duquet@ut.ee
+If you have any questions or comments about MetaExploreX, please get in touch with us at duquet@ut.ee
 
-## About flutter
 
-This project is a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
