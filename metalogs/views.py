@@ -56,7 +56,7 @@ def process_uploaded_file(request, num_mrs, file_type):
         chart_data3 = get_chart_data3(log_csv)
         chart_data4 = get_chart_data4(log_csv)
         chart_data5 = get_chart_data5(log_csv)
-        chart_data6 = get_chart_data5(log_csv)
+        chart_data6 = get_chart_data6(log_csv)
         chart_data7 = get_chart_data7(log_csv)
         
         return {
