@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MetaExploreX</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" type="text/css" href="{% static 'home.css' %}">
+
+</head>
+<body>
+    <h1>MetaExploreX</h1>
+    <form action="{% url 'metalogs' %}" class="analysis-options" method="GET" enctype="multipart/form-data" id="upload-form" onsubmit="return validateForm()">
+        {% csrf_token %}
+        <label>How many MRs will be in the log file?</label>
+        <input type="number" name="num_mrs" id="num-mrs" placeholder="Enter the number of MRs" class="form-control" required>
+        <br>
+        <div class="">
+            <label>Choose your log file type!</label>
+            <select class="form-control" name="file_type" required>
+                <option aria-readonly="true">Choose file type!</option>
+                <option value="single" id="single-analysis">All MRs in a single file</option>
+                <option value="multiple" id="multiple-analysis">All MRs in multiple files</option>
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary pt-3" id="upload-button">Next</button>
+    </form>
+
+
+    <script>
+        document.getElementById("upload-button").addEventListener("click", function() {
+            showLoader();
+        });
+
+        function showLoader() {
+            document.getElementById("main").style.display = "none";
+            document.getElementById("loader").style.display = "block";
+
+            setTimeout(function() {
+                document.getElementById("loader").style.display = "none";
+                document.getElementById("main").style.display = "block";
+            }, 3000);
+        }
+
+        function validateForm() {
+            var selectedOption = document.querySelector('select').value;
+            if (selectedOption == "Choose file type!") {
+                alert('Please choose a log file type (Single/Multiple) before uploading.');
+                return false; 
+            }
+            return true;
+        }
+
+    </script>
+</body>
+</html>

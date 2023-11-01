@@ -1,0 +1,907 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    {% load static %}
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>MetaExploreX</title>
+    <link rel="shortcut icon" type="image/png" href="../assets/images/logos/favicon.png" />
+    <link rel="stylesheet" href="{% static 'styles.min.css' %}" />
+    <!-- <link rel="stylesheet" type="text/css" href="{% static 'charts.css' %}"> -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<style>
+.chart-type-dropdown {
+    position: relative;
+    display: inline-block;
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    float: right;
+    border-radius: 4px;
+    overflow: hidden;
+    top: 5%;
+}
+
+.chart-type-dropdown select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    width: 100%;
+    padding: 5px; 
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    outline: none;
+    font-size: 12px; 
+}
+
+.chart-type-dropdown::after {
+    content: "\25BC";
+    font-size: 10px;
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+}
+
+.chart-type-dropdown select option {
+    padding: 5px; 
+    background-color: #f0f0f0;
+    font-size: 10px;
+    color: #333;
+    cursor: pointer;
+    font-family: Georgia, 'Times New Roman', Times, serif;
+}
+
+.chart-type-dropdown select option:hover {
+    background-color: #ddd;
+}
+
+.chart-type-dropdown select option:checked {
+    background-color: #007BFF;
+    color: #fff;
+}
+
+#overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    z-index: 999; 
+}
+
+#info-box {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #fff;
+    padding: 20px;
+    z-index: 1000;
+}
+
+
+</style>
+<body>
+  <div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full"
+    data-sidebar-position="fixed" data-header-position="fixed">
+    <aside class="left-sidebar">
+      <div>
+        <div class="brand-logo d-flex align-items-center justify-content-between">
+          <a href="#" class="text-nowrap ff-times">
+            <h4>MetaExploreX</h4>
+          </a>
+          <div class="close-btn d-xl-none d-block sidebartoggler cursor-pointer" id="sidebarCollapse">
+            <i class="ti ti-x fs-8"></i>
+          </div>
+        </div>
+        <nav class="sidebar-nav scroll-sidebar" data-simplebar="">
+          <ul id="sidebarnav">
+            <li class="nav-small-cap">
+              <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
+              <span class="hide-menu">Home</span>
+            </li>
+            <li class="sidebar-item">
+              <a class="sidebar-link" href="./index.html" aria-expanded="false">
+                <span>
+                  <i class="ti ti-layout-dashboard"></i>
+                </span>
+                <span class="hide-menu">Dashboard</span>
+              </a>
+            </li>
+            <li class="nav-small-cap">
+              <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
+              <span class="hide-menu">Others</span>
+            </li>
+            <li class="sidebar-item">
+              <a class="sidebar-link" href="./ui-buttons.html" aria-expanded="false">
+                <span>
+                  <i class="ti ti-article"></i>
+                </span>
+                <span class="hide-menu">Buttons</span>
+              </a>
+            </li>
+            <li class="sidebar-item">
+              <a class="sidebar-link" href="./ui-alerts.html" aria-expanded="false">
+                <span>
+                  <i class="ti ti-alert-circle"></i>
+                </span>
+                <span class="hide-menu">Alerts</span>
+              </a>
+            </li>
+            <li class="sidebar-item">
+              <a class="sidebar-link" href="./ui-card.html" aria-expanded="false">
+                <span>
+                  <i class="ti ti-cards"></i>
+                </span>
+                <span class="hide-menu">Card</span>
+              </a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </aside>
+    <div class="body-wrapper">
+      <header class="app-header">
+        <nav class="navbar navbar-expand-lg navbar-light">
+          <ul class="navbar-nav">
+            <li class="nav-item d-block d-xl-none">
+              <a class="nav-link sidebartoggler nav-icon-hover" id="headerCollapse" href="javascript:void(0)">
+                <i class="ti ti-menu-2"></i>
+              </a>
+            </li>
+          </ul>
+          <div class="navbar-collapse justify-content-end px-0" id="navbarNav">
+            <div id="cancel-section">
+                <form action="{% url 'home' %}" class="navbar-nav flex-row ms-auto align-items-center justify-content-end" method="GET" enctype="multipart/form-data" id="upload-form">
+                    <input type="submit" class="btn btn-primary" id="cancel-button" onclick="cancelUpload()" value="Back"/>
+                </form>
+            </div>
+          </div>
+        </nav>
+      </header>
+      <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-8 d-flex align-items-strech">
+                <div class="card w-100">
+                  <div class="card-body chart-container">
+                    <div class="d-sm-flex d-block align-items-center justify-content-between mb-9">
+                      <div class="mb-3 mb-sm-0">
+                        <h5 class="card-title fw-semibold text-center">Distribution of Not-Crashed Values in MR Checker Columns</h5>
+                      </div>
+                    </div>
+                    <div class="chart-type-dropdown">
+                            <select id="chart-type-select4">
+                                <option value="" aria-readonly="">Chart Type</option>
+                                <option value="bar">Bar Chart</option>
+                                <option value="doughnut">Doughnut Chart</option>
+                                <option value="line">Line Chart</option>
+                                <option value="pie">Pie Chart</option>
+                            </select>
+                    </div>
+                    <div class="chart-container" id="" style="height: 400px!important;">
+                        <canvas id="chart4"></canvas>
+                    </div>
+                  </div>
+                </div>
+                
+              </div>
+          <div class="col-lg-4">
+            <div class="row">
+              <div class="col-lg-12">
+                <div class="card overflow-hidden">
+                  <div class="card-body p-4">
+                    <h5 class="card-title  fw-semibold">MR Violations</h5>
+                    <div class="row align-items-center">
+                      <div class="">
+                        <div class="chart-container">
+                            <canvas id="chart7"></canvas>
+                        </div>
+                      </div>
+                     
+                      <div class="">
+                        <h4 class="fw-semibold mb-3" id="total_rows"> </h4>
+                        <div class="d-flex align-items-center ">
+                            <h6 id="violated_rows" class="fw-semibold"></h6>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-12">
+                <div class="card">
+                  <div class="card-body">
+                    <div class="row alig n-items-start">
+                      <div class="col-8">
+                        <h5 class="card-title mb-9 fw-semibold"> Monthly Earnings </h5>
+                        <h4 class="fw-semibold mb-3">$6,820</h4>
+                        <div class="d-flex align-items-center pb-1">
+                          <span
+                            class="me-2 rounded-circle bg-light-danger round-20 d-flex align-items-center justify-content-center">
+                            <i class="ti ti-arrow-down-right text-danger"></i>
+                          </span>
+                          <p class="text-dark me-1 fs-3 mb-0">+9%</p>
+                          <p class="fs-3 mb-0">last year</p>
+                        </div>
+                      </div>
+                      <div class="col-4">
+                        <div class="d-flex justify-content-end">
+                          <div
+                            class="text-white bg-secondary rounded-circle p-6 d-flex align-items-center justify-content-center">
+                            <i class="ti ti-currency-dollar fs-6"></i>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div id="earning"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+              <div class="col-lg-6 d-flex align-items-strech">
+                <div class="card w-100">
+                  <div class="card-body chart-container">
+                    <div class="d-sm-flex d-block align-items-center justify-content-between mb-9">
+                      <div class="mb-3 mb-sm-0">
+                        <h5 class="card-title fw-semibold text-center">Distribution of Violations by Metamorphic Rule</h5>
+                        <div class="chart-type-dropdown">
+                            <select id="chart-type-select1">
+                                <option value="" aria-readonly="">Chart Type</option>
+                                <option value="doughnut">Doughnut Chart</option>
+                                <option value="bar">Bar Chart</option>
+                                <option value="line">Line Chart</option>
+                                <option value="pie">Pie Chart</option>
+                            </select>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div class="chart-container" id="">
+                        <canvas id="chart1"></canvas>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-lg-6 d-flex align-items-strech">
+                <div class="card w-100">
+                  <div class="card-body chart-container">
+                    <div class="d-sm-flex d-block align-items-center justify-content-between mb-9">
+                      <div class="mb-3 mb-sm-0">
+                        <h5 class="card-title fw-semibold text-center">Distribution of Non-Violations by Metamorphic Rule</h5>
+                        <div class="chart-type-dropdown">
+                            <select id="chart-type-select2">
+                            <option value="" aria-readonly="">Chart Type</option>
+                            <option value="doughnut">Doughnut Chart</option>
+                            <option value="bar">Bar Chart</option>
+                            <option value="line">Line Chart</option>
+                            <option value="pie">Pie Chart</option>
+                        </select>
+                    </div>
+                        </div>
+                    </div>
+                    <div class="chart-container" id="">
+                        <canvas id="chart2"></canvas>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-lg-12 d-flex align-items-strech">
+                <div class="card w-100">
+                  <div class="card-body chart-container">
+                    <div class="d-sm-flex d-block align-items-center justify-content-between mb-9">
+                      <div class="mb-3 mb-sm-0">
+                        <h5 class="card-title fw-semibold text-center">Distribution Crashed Values in MR Checker Columns</h5>
+                      </div>
+                    </div>
+                    <div class="chart-type-dropdown">
+                        <select id="chart-type-select3">
+                            <option value="" aria-readonly="">Chart Type</option>
+                            <option value="doughnut">Doughnut Chart</option>
+                            <option value="bar">Bar Chart</option>
+                            <option value="line">Line Chart</option>
+                            <option value="pie">Pie Chart</option>
+                        </select>
+                    </div>
+                    <div class="chart-container" id="" style="height: 400px!important;">
+                        <canvas id="chart3"></canvas>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-lg-12 d-flex align-items-strech">
+                <div class="card w-100">
+                  <div class="card-body chart-container">
+                    <div class="d-sm-flex d-block align-items-center justify-content-between mb-9">
+                      <div class="mb-3 mb-sm-0">
+                        <h5 class="card-title fw-semibold text-center">Distribution of Output Values for MR Violations</h5>
+                      </div>
+                    </div>
+                    <div class="chart-type-dropdown">
+                        <select id="chart-type-select5">
+                            <option value="" aria-readonly="">Chart Type</option>
+                            <option value="doughnut">Doughnut Chart</option>
+                            <option value="bar">Bar Chart</option>
+                            <option value="line">Line Chart</option>
+                            <option value="pie">Pie Chart</option>
+                        </select>
+                    </div>
+                    <div class="chart-container" id="" style="height: 400px!important;">
+                        <canvas id="chart5"></canvas>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-lg-12 d-flex align-items-strech">
+                <div class="card w-100">
+                  <div class="card-body chart-container">
+                    <div class="d-sm-flex d-block align-items-center justify-content-between mb-9">
+                      <div class="mb-3 mb-sm-0">
+                        <h5 class="card-title fw-semibold text-center">Distribution of Output Values for MR Non-Violations</h5>
+                      </div>
+                    </div>
+                    <div class="chart-type-dropdown">
+                        <select id="chart-type-select6">
+                            <option value="" aria-readonly="">Chart Type</option>
+                            <option value="doughnut">Doughnut Chart</option>
+                            <option value="bar">Bar Chart</option>
+                            <option value="line">Line Chart</option>
+                            <option value="pie">Pie Chart</option>
+                        </select>
+                    </div>
+                    <div class="chart-container" id="" style="height: 400px!important;">
+                        <canvas id="chart6"></canvas>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+
+              </div>
+
+        <div class="row">
+          <div class="col-lg-4 d-flex align-items-stretch">
+            <div class="card w-100">
+              <div class="card-body p-4">
+                <div class="mb-4">
+                  <h5 class="card-title fw-semibold">Recent Transactions</h5>
+                </div>
+                <ul class="timeline-widget mb-0 position-relative mb-n5">
+                  <li class="timeline-item d-flex position-relative overflow-hidden">
+                    <div class="timeline-time text-dark flex-shrink-0 text-end">09:30</div>
+                    <div class="timeline-badge-wrap d-flex flex-column align-items-center">
+                      <span class="timeline-badge border-2 border border-primary flex-shrink-0 my-8"></span>
+                      <span class="timeline-badge-border d-block flex-shrink-0"></span>
+                    </div>
+                    <div class="timeline-desc fs-3 text-dark mt-n1">Payment received from John Doe of $385.90</div>
+                  </li>
+                  <li class="timeline-item d-flex position-relative overflow-hidden">
+                    <div class="timeline-time text-dark flex-shrink-0 text-end">10:00 am</div>
+                    <div class="timeline-badge-wrap d-flex flex-column align-items-center">
+                      <span class="timeline-badge border-2 border border-info flex-shrink-0 my-8"></span>
+                      <span class="timeline-badge-border d-block flex-shrink-0"></span>
+                    </div>
+                    <div class="timeline-desc fs-3 text-dark mt-n1 fw-semibold">New sale recorded <a
+                        href="javascript:void(0)" class="text-primary d-block fw-normal">#ML-3467</a>
+                    </div>
+                  </li>
+                  <li class="timeline-item d-flex position-relative overflow-hidden">
+                    <div class="timeline-time text-dark flex-shrink-0 text-end">12:00 am</div>
+                    <div class="timeline-badge-wrap d-flex flex-column align-items-center">
+                      <span class="timeline-badge border-2 border border-success flex-shrink-0 my-8"></span>
+                      <span class="timeline-badge-border d-block flex-shrink-0"></span>
+                    </div>
+                    <div class="timeline-desc fs-3 text-dark mt-n1">Payment was made of $64.95 to Michael</div>
+                  </li>
+                  <li class="timeline-item d-flex position-relative overflow-hidden">
+                    <div class="timeline-time text-dark flex-shrink-0 text-end">09:30 am</div>
+                    <div class="timeline-badge-wrap d-flex flex-column align-items-center">
+                      <span class="timeline-badge border-2 border border-warning flex-shrink-0 my-8"></span>
+                      <span class="timeline-badge-border d-block flex-shrink-0"></span>
+                    </div>
+                    <div class="timeline-desc fs-3 text-dark mt-n1 fw-semibold">New sale recorded <a
+                        href="javascript:void(0)" class="text-primary d-block fw-normal">#ML-3467</a>
+                    </div>
+                  </li>
+                  <li class="timeline-item d-flex position-relative overflow-hidden">
+                    <div class="timeline-time text-dark flex-shrink-0 text-end">09:30 am</div>
+                    <div class="timeline-badge-wrap d-flex flex-column align-items-center">
+                      <span class="timeline-badge border-2 border border-danger flex-shrink-0 my-8"></span>
+                      <span class="timeline-badge-border d-block flex-shrink-0"></span>
+                    </div>
+                    <div class="timeline-desc fs-3 text-dark mt-n1 fw-semibold">New arrival recorded 
+                    </div>
+                  </li>
+                  <li class="timeline-item d-flex position-relative overflow-hidden">
+                    <div class="timeline-time text-dark flex-shrink-0 text-end">12:00 am</div>
+                    <div class="timeline-badge-wrap d-flex flex-column align-items-center">
+                      <span class="timeline-badge border-2 border border-success flex-shrink-0 my-8"></span>
+                    </div>
+                    <div class="timeline-desc fs-3 text-dark mt-n1">Payment Done</div>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-8 d-flex align-items-stretch">
+            <div class="card w-100">
+              <div class="card-body p-4">
+                <h5 class="card-title fw-semibold mb-4">Recent Transactions</h5>
+                <div class="table-responsive">
+                  <table class="table text-nowrap mb-0 align-middle">
+                    <thead class="text-dark fs-4">
+                      <tr>
+                        <th class="border-bottom-0">
+                          <h6 class="fw-semibold mb-0">Id</h6>
+                        </th>
+                        <th class="border-bottom-0">
+                          <h6 class="fw-semibold mb-0">Assigned</h6>
+                        </th>
+                        <th class="border-bottom-0">
+                          <h6 class="fw-semibold mb-0">Name</h6>
+                        </th>
+                        <th class="border-bottom-0">
+                          <h6 class="fw-semibold mb-0">Priority</h6>
+                        </th>
+                        <th class="border-bottom-0">
+                          <h6 class="fw-semibold mb-0">Budget</h6>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td class="border-bottom-0"><h6 class="fw-semibold mb-0">1</h6></td>
+                        <td class="border-bottom-0">
+                            <h6 class="fw-semibold mb-1">Sunil Joshi</h6>
+                            <span class="fw-normal">Web Designer</span>                          
+                        </td>
+                        <td class="border-bottom-0">
+                          <p class="mb-0 fw-normal">Elite Admin</p>
+                        </td>
+                        <td class="border-bottom-0">
+                          <div class="d-flex align-items-center gap-2">
+                            <span class="badge bg-primary rounded-3 fw-semibold">Low</span>
+                          </div>
+                        </td>
+                        <td class="border-bottom-0">
+                          <h6 class="fw-semibold mb-0 fs-4">$3.9</h6>
+                        </td>
+                      </tr> 
+                      <tr>
+                        <td class="border-bottom-0"><h6 class="fw-semibold mb-0">2</h6></td>
+                        <td class="border-bottom-0">
+                            <h6 class="fw-semibold mb-1">Andrew McDownland</h6>
+                            <span class="fw-normal">Project Manager</span>                          
+                        </td>
+                        <td class="border-bottom-0">
+                          <p class="mb-0 fw-normal">Real Homes WP Theme</p>
+                        </td>
+                        <td class="border-bottom-0">
+                          <div class="d-flex align-items-center gap-2">
+                            <span class="badge bg-secondary rounded-3 fw-semibold">Medium</span>
+                          </div>
+                        </td>
+                        <td class="border-bottom-0">
+                          <h6 class="fw-semibold mb-0 fs-4">$24.5k</h6>
+                        </td>
+                      </tr> 
+                      <tr>
+                        <td class="border-bottom-0"><h6 class="fw-semibold mb-0">3</h6></td>
+                        <td class="border-bottom-0">
+                            <h6 class="fw-semibold mb-1">Christopher Jamil</h6>
+                            <span class="fw-normal">Project Manager</span>                          
+                        </td>
+                        <td class="border-bottom-0">
+                          <p class="mb-0 fw-normal">MedicalPro WP Theme</p>
+                        </td>
+                        <td class="border-bottom-0">
+                          <div class="d-flex align-items-center gap-2">
+                            <span class="badge bg-danger rounded-3 fw-semibold">High</span>
+                          </div>
+                        </td>
+                        <td class="border-bottom-0">
+                          <h6 class="fw-semibold mb-0 fs-4">$12.8k</h6>
+                        </td>
+                      </tr>      
+                      <tr>
+                        <td class="border-bottom-0"><h6 class="fw-semibold mb-0">4</h6></td>
+                        <td class="border-bottom-0">
+                            <h6 class="fw-semibold mb-1">Nirav Joshi</h6>
+                            <span class="fw-normal">Frontend Engineer</span>                          
+                        </td>
+                        <td class="border-bottom-0">
+                          <p class="mb-0 fw-normal">Hosting Press HTML</p>
+                        </td>
+                        <td class="border-bottom-0">
+                          <div class="d-flex align-items-center gap-2">
+                            <span class="badge bg-success rounded-3 fw-semibold">Critical</span>
+                          </div>
+                        </td>
+                        <td class="border-bottom-0">
+                          <h6 class="fw-semibold mb-0 fs-4">$2.4k</h6>
+                        </td>
+                      </tr>                       
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+    
+      </div>
+    </div>
+  </div>
+<h5>Info section</h5>
+  <div id="overlay" style="display: none;"></div>
+<div id="info-box" style="display: none;">
+    <div id="info-content">
+        <h5>Info section</h5>
+    </div>
+</div>
+
+
+  <script>
+    function generateRandomColors(numColors) {
+    var colors = [];
+    for (var i = 0; i < numColors; i++) {
+        var randomColor = 'rgba(' + Math.floor(Math.random() * 256) + ',' + Math.floor(Math.random() * 256) + ',' + Math.floor(Math.random() * 256) + ', 0.8)';
+        colors.push(randomColor);
+    }
+    return colors;
+}
+
+var numMRs = {{ chart_data.labels|length }}; 
+
+var chartData = {
+labels: {{chart_data.labels|safe}},
+datasets: [{
+    label: 'Number of Violations',
+    data:  {{chart_data.data|safe}},
+    backgroundColor: generateRandomColors(numMRs),
+    // borderColor: generateRandomColors(numMRs),
+    borderWidth: 1
+}]
+};
+
+var chartContainer1 = document.getElementById('chart1');
+var chartTypeSelect1 = document.getElementById('chart-type-select1');
+
+var defaultChartType1 = 'doughnut';
+var ctx = document.getElementById('chart1').getContext('2d');
+var myChart1 = new Chart(ctx, {
+type: defaultChartType1,
+data: chartData,
+options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+        y: {
+            beginAtZero: true
+        },
+    },
+}
+});
+
+chartTypeSelect1.addEventListener('change', function () {
+  var selectedChartType = chartTypeSelect1.value;
+  myChart1.config.type = selectedChartType;
+  myChart1.update();
+});
+
+
+
+var chartData2 = {
+labels: {{chart_data2.labels|safe}},
+datasets: [{
+    label: 'Number of Non Violations',
+    data:  {{chart_data2.data|safe}},
+    backgroundColor: generateRandomColors(numMRs),
+    // borderColor: generateRandomColors(numMRs),
+    borderWidth: 1
+}]
+};
+
+var chartContainer2 = document.getElementById('chart2');
+var chartTypeSelect2 = document.getElementById('chart-type-select2');
+
+var defaultChartType2 = 'doughnut';
+var ctx2 = document.getElementById('chart2').getContext('2d');
+var myChart2 = new Chart(ctx2, {
+type: defaultChartType2,
+data: chartData2,
+options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+        y: {
+            beginAtZero: true
+        },
+
+    },
+}
+});
+
+chartTypeSelect2.addEventListener('change', function () {
+  var selectedChartType = chartTypeSelect2.value;
+  myChart2.config.type = selectedChartType;
+  myChart2.update();
+});
+
+var chartData3 = {
+labels: {{chart_data3.labels|safe}} ,
+datasets: [{
+    label: 'Crashed MRs',
+    data: {{chart_data3.data|safe}},
+    backgroundColor: generateRandomColors(numMRs),
+    // borderColor: generateRandomColors(numMRs),
+    borderWidth: 1,
+    barThickness: 20,
+}]
+};
+
+var chartContainer3 = document.getElementById('chart3');
+var chartTypeSelect3 = document.getElementById('chart-type-select3');
+
+var defaultChartType3 = 'bar';
+var ctx3 = document.getElementById('chart3').getContext('2d');
+let delayed;
+var myChart3 = new Chart(ctx3, {
+type: defaultChartType3,
+data: chartData3,
+options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+        y: {
+            beginAtZero: true
+        }
+    },
+    animation: {
+    onComplete: () => {
+        delayed = true;
+    },
+    delay: (context) => {
+        let delay = 0;
+        if (context.type === 'data' && context.mode === 'default' && !delayed) {
+        delay = context.dataIndex * 300 + context.datasetIndex * 100;
+        }
+        return delay;
+    },
+},
+}
+});
+
+chartTypeSelect3.addEventListener('change', function () {
+  var selectedChartType = chartTypeSelect3.value;
+  myChart3.config.type = selectedChartType;
+  myChart3.update();
+});
+
+
+var chartData4 = {
+labels: {{chart_data4.labels|safe}} ,
+datasets: [{
+    label: 'Non-Crashed MRs',
+    data: {{chart_data4.data|safe}},
+    backgroundColor: generateRandomColors(numMRs),
+    // borderColor: generateRandomColors(numMRs),
+    borderWidth: 1,
+    barThickness: 30,
+}]
+};
+
+var chartContainer4 = document.getElementById('chart4');
+var chartTypeSelect4 = document.getElementById('chart-type-select4');
+
+var defaultChartType4 = 'bar';
+var ctx4 = chartContainer4.getContext('2d');
+var myChart4 = new Chart(ctx4, {
+  type: defaultChartType4,
+  data: chartData4,
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      y: {
+        beginAtZero: true,
+      },
+    },
+    legend: {
+      display: true,
+    },
+    animation: {
+      onComplete: () => {
+        delayed = true;
+      },
+      delay: (context) => {
+        let delay = 0;
+        if (context.type === 'data' && context.mode === 'default' && !delayed) {
+          delay = context.dataIndex * 300 + context.datasetIndex * 100;
+        }
+        return delay;
+      },
+    },
+  },
+});
+
+chartTypeSelect4.addEventListener('change', function () {
+  var selectedChartType = chartTypeSelect4.value;
+  myChart4.config.type = selectedChartType;
+  myChart4.update();
+});
+
+
+var chartData5 = {
+labels: {{chart_data5.labels|safe}},
+datasets: {{chart_data5.datasets|safe}} 
+};
+
+
+var chartContainer5 = document.getElementById('chart5');
+var chartTypeSelect5 = document.getElementById('chart-type-select5');
+
+var defaultChartType5 = 'bar';
+var ctx5 = document.getElementById('chart5').getContext('2d');
+var myChart5 = new Chart(ctx5, {
+type: defaultChartType5,
+data: chartData5,
+options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+        legend: {
+            position: 'top',
+        },
+},
+}                                                                      
+});
+
+chartTypeSelect5.addEventListener('change', function () {
+  var selectedChartType = chartTypeSelect5.value;
+  myChart5.config.type = selectedChartType;
+  myChart5.update();
+});
+
+
+
+var chartData6 = {
+labels: {{chart_data6.labels|safe}},
+datasets: {{chart_data6.datasets|safe}},
+};
+
+var chartContainer6 = document.getElementById('chart6');
+var chartTypeSelect6 = document.getElementById('chart-type-select6');
+
+var defaultChartType6 = 'bar';
+var ctx6 = document.getElementById('chart6').getContext('2d');
+var myChart6 = new Chart(ctx6, {
+type: defaultChartType6,
+data: chartData6,
+options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+        legend: {
+            position: 'top',
+        },
+},
+}                                                                      
+});
+
+chartTypeSelect6.addEventListener('change', function () {
+  var selectedChartType = chartTypeSelect6.value;
+  myChart6.config.type = selectedChartType;
+  myChart6.update();
+});
+
+var totalViolations = {{ chart_data7.data.0|safe }};
+var totalNonViolations = {{ chart_data7.data.1|safe }};
+var totalData = totalViolations + totalNonViolations;
+
+var percentViolations = (totalViolations / totalData) * 100;
+var percentNonViolations = 100 - percentViolations;
+document.getElementById("total_rows").innerText = "Total data:" + {{chart_data7.total_data_points}}
+document.getElementById("violated_rows").innerText = Math.round(percentViolations) + "% of data are violated."
+// Create chart data
+var chartData7 = {
+    labels: ['Violations', 'Non-violations'],
+    datasets: [{
+        data: [percentViolations, percentNonViolations ],
+        backgroundColor: ['rgba(93, 125, 255, 0.5)', 'rgb(73, 135, 255)'], 
+        borderColor: ['rgba(77, 125, 255, 0.5)', 'rgba(132, 125, 255, 0.5)'],
+        borderWidth: 1,
+        barThickness: 20,
+    }]
+};
+
+var ctx7 = document.getElementById('chart7').getContext('2d');
+var myChart7 = new Chart(ctx7, {
+    type: 'doughnut',
+    data: chartData7,
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: 85, 
+        plugins: {
+            legend: {
+                display: false
+            }
+        }
+    }
+});
+
+
+function showInfoBox(content, chartData, selectedMR, inputTestData, violated_MRchecker, outputTestInput) {
+    var overlay = document.getElementById('overlay');
+    var infoBox = document.getElementById('info-box');
+    var infoContent = document.getElementById('info-content');
+
+    var selectedIndex = chartData.labels.indexOf(selectedMR);
+
+    var tableHTML = '<table class="table table-bordered">';
+    if (selectedIndex !== -1) {
+        tableHTML += `<tr><th>InputTestData</th><th>TransformedMR</th><th>OutputInputData</th><th>OutputMR</th><th>${selectedMR}</th><th>NumberOfViolations</th></tr>`;
+        tableHTML += '<tr>';
+        tableHTML += '<td>' + inputTestData + '</td>';
+        tableHTML += '<td>' + violated_MRchecker + '</td>'; 
+        tableHTML += '<td>' + outputTestInput + '</td>';
+        tableHTML += '<td>' + 'bos' + '</td>'; 
+        tableHTML += '<td>' + violated_MRchecker + '</td>'; 
+        tableHTML += '</tr>';
+    }
+
+    tableHTML += '</table>';
+
+    infoContent.innerHTML = content + '<br>' + tableHTML;
+
+    overlay.style.display = 'block';
+    infoBox.style.display = 'block';
+}
+
+myChart1.options.onClick = function (e, elements) {
+    if (elements[0]) {
+        var index = elements[0].index;
+        var content = 'Info related to label: ' + myChart1.data.labels[index];
+        var selectedMR = myChart1.data.labels[index];
+        var inputTestData = {{chart_data.input_testData_with_violations|safe}}.slice(0, 10);
+        var violated_MRchecker = {{ chart_data.violated_MRchecker|safe }}[selectedMR];
+        var outputTestInput = {{chart_data.output_testInput|safe}}.slice(0, 10); 
+
+        showInfoBox(content, chartData, selectedMR, inputTestData, violated_MRchecker, outputTestInput);
+  }
+};
+
+myChart2.options.onClick = function (e, elements) {
+    if (elements[0]) {
+        var index = elements[0].index;
+        var content = 'Info related to label: ' + myChart2.data.labels[index];
+        var selectedMR = myChart2.data.labels[index];
+        showInfoBox(content, chartData2, selectedMR, inputTestData); // Pass inputTestData here
+    }
+};
+
+document.getElementById('overlay').addEventListener('click', function () {
+    document.getElementById('overlay').style.display = 'none';
+    document.getElementById('info-box').style.display = 'none';
+});
+
+
+</script>
+</body>
+
+</html>

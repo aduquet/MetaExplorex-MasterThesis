@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+    {% load static %}
+    <title>Log Viewer</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" type="text/css" href="{% static 'style.css' %}">
+</head>
+<body>
+<h1>META Log</h1>
+<div id="loader" class="loader"></div>
+{% for message in messages %}
+    <div class="alert alert-{{ message.tags }}">
+        <span class="close" data-dismiss="alert">&times;</span>
+        {{ message }}
+    </div>
+{% endfor %}
+
+
+<div class="main" id="main">
+    <form method="POST" enctype="multipart/form-data" id="upload-form" onsubmit="return validateForm()">
+        {% csrf_token %}
+        <label for="file">Choose Log file</label>
+        <input type="file" name="file" id="file" accept=".csv">
+        <button type="submit" id="upload-button">Upload and Process</button>
+    </form>
+
+   
+</div>
+
+<script>
+    document.getElementById("upload-button").addEventListener("click", function() {
+        showLoader();
+    });
+
+    function showLoader() {
+        document.getElementById("main").style.display = "none";
+        document.getElementById("loader").style.display = "block";
+
+        setTimeout(function() {
+            document.getElementById("loader").style.display = "none";
+            document.getElementById("main").style.display = "block";
+
+            if (chartsAreDisplayed()) {
+                showCancelSection();
+            }
+        }, 3000);
+    }
+
+    function chartsAreDisplayed() {
+        return document.getElementById("chart1").style.display === "block";
+    }
+
+    function showCancelSection() {
+        document.getElementById("upload-form").style.display = "none";
+        document.getElementById("cancel-section").style.display = "block";
+    }
+
+    function cancelUpload() {
+        document.getElementById("upload-form").style.display = "block";
+        document.getElementById("cancel-section").style.display = "none";
+    }
+
+    function generateRandomColors(numColors) {
+        var colors = [];
+        for (var i = 0; i < numColors; i++) {
+            var randomColor = 'rgba(' + Math.floor(Math.random() * 256) + ',' + Math.floor(Math.random() * 256) + ',' + Math.floor(Math.random() * 256) + ', 0.5)';
+            colors.push(randomColor);
+        }
+        return colors;
+    }
+
+    var numMRs = {{ chart_data.labels|length }}; 
+
+    var chartData = {
+        labels: {{chart_data.labels|safe}},
+        datasets: [{
+            label: 'Number of Violations',
+            data:  {{chart_data.data|safe}},
+            backgroundColor: generateRandomColors(numMRs),
+            borderColor: generateRandomColors(numMRs),
+            borderWidth: 1
+        }]
+    };
+
+    var ctx = document.getElementById('chart1').getContext('2d');
+    var myChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: chartData,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            },
+            title: {
+                    display: true,
+                    text: 'Distribution of Violations by Metamorphic Rule'
+                }
+
+        }
+    });
+
+    var chartData2 = {
+        labels: {{chart_data2.labels|safe}} ,
+        datasets: [{
+            label: 'Crashed MRs',
+            data: {{chart_data2.data|safe}},
+            backgroundColor: generateRandomColors(numMRs),
+            borderColor: generateRandomColors(numMRs),
+            borderWidth: 1
+        }]
+    };
+
+    var ctx2 = document.getElementById('chart2').getContext('2d');
+    let delayed;
+    var myChart2 = new Chart(ctx2, {
+        type: 'bar',
+        data: chartData2,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            },
+            animation: {
+            onComplete: () => {
+                delayed = true;
+            },
+            delay: (context) => {
+                let delay = 0;
+                if (context.type === 'data' && context.mode === 'default' && !delayed) {
+                delay = context.dataIndex * 300 + context.datasetIndex * 100;
+                }
+                return delay;
+            },
+    },
+            title: {
+                    display: true,
+                    text: 'Counts of Crashed Values in MR Checker Columns'
+                }
+        }
+    });
+
+    var chartData3 = {
+        labels: {{chart_data3.labels|safe}},
+        datasets: {{chart_data3.datasets|safe}} 
+    };
+
+    var ctx3 = document.getElementById('chart3').getContext('2d');
+    var myChart3 = new Chart(ctx3, {
+        type: 'bar',
+        data: chartData3,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                title: {
+                    display: true,
+                    text: 'Distribution of Output Values for MR Violations'
+                }
+        },
+    }                                                                      
+})
+
+
+</script>
+</body>
+</html>
