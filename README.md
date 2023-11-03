@@ -10,7 +10,9 @@ MetaExploreX is a tool for visualising and exploring the results of metamorphic 
 
 ## Getting Started
 
-To use MetaExploreX, bla bla bla
+To start MetaExploreX you can run following commands:
+- python manage.py runserver
+- docker compose up --build
 
 ## Usage
 
