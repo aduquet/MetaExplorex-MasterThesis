@@ -75,7 +75,7 @@ def process_uploaded_file(request, num_mrs, file_type):
         return 'upload'
 
     except Exception as e:
-        messages.error(request, str(e))
+        messages.error(request, 'Something went wrong check your file and try again!')
         return 'upload'
 
 

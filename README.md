@@ -33,5 +33,3 @@ Contributions to MetaExploreX are welcome! If you have an idea for a new feature
 ## Contact
 
 If you have any questions or comments about MetaExploreX, please get in touch with us at duquet@ut.ee
-
-

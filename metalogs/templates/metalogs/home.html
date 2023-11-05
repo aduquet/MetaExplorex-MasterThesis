@@ -17,9 +17,6 @@
     <h1>MetaExploreX</h1>
     <form action="{% url 'metalogs' %}" class="analysis-options" method="GET" enctype="multipart/form-data" id="upload-form" onsubmit="return validateForm()">
         {% csrf_token %}
-        <label>How many MRs will be in the log file?</label>
-        <input type="number" name="num_mrs" id="num-mrs" placeholder="Enter the number of MRs" class="form-control" required>
-        <br>
         <div class="">
             <label>Choose your log file type!</label>
             <select class="form-control" name="file_type" required>
@@ -28,6 +25,9 @@
                 <option value="multiple" id="multiple-analysis">All MRs in multiple files</option>
             </select>
         </div>
+        <br>
+        <label>How many MRs will be in the log file?</label>
+        <input type="number" name="num_mrs" id="num-mrs" placeholder="Enter the number of MRs" class="form-control" required>
         <button type="submit" class="btn btn-primary pt-3" id="upload-button">Next</button>
     </form>
 
@@ -36,6 +36,27 @@
         document.getElementById("upload-button").addEventListener("click", function() {
             showLoader();
         });
+        
+        document.querySelector('select[name="file_type"]').addEventListener('change', function() {
+        var selectedOption = this.value;
+        var numMRsInput = document.getElementById("num-mrs");
+
+        if (selectedOption === "multiple") {
+            numMRsInput.value = 1; 
+            numMRsInput.setAttribute("readonly", "true"); 
+        } else {
+            numMRsInput.removeAttribute("readonly");
+        }
+    });
+
+    window.addEventListener("load", function() {
+        var shouldResetForm = document.getElementById("num-mrs").value;
+        if (shouldResetForm) {
+            var form = document.getElementById("upload-form");
+            form.reset(); 
+        }
+    });
+
 
         function showLoader() {
             document.getElementById("main").style.display = "none";
@@ -55,6 +76,7 @@
             }
             return true;
         }
+
 
     </script>
 </body>
