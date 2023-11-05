@@ -13,8 +13,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-</head>
+    <script src="https://kit.fontawesome.com/badfe390f0.js" crossorigin="anonymous"></script></head>
 <style>
 .chart-type-dropdown {
     position: relative;
@@ -86,7 +85,16 @@
     padding: 20px;
     z-index: 1000;
 }
-
+.sidebar-link{
+  border: 1px solid #4987ff;
+}
+.slider-link span{
+  font-size: 16px!important;
+}
+.brand-logo{
+  /* background-color: red; */
+  height: 200px;
+}
 
 </style>
 <body>
@@ -95,8 +103,9 @@
     <aside class="left-sidebar">
       <div>
         <div class="brand-logo d-flex align-items-center justify-content-between">
-          <a href="#" class="text-nowrap ff-times">
-            <h4>MetaExploreX</h4>
+          <a href="./index.html" class="text-nowrap">
+            <!-- <h4>MetaExploreX</h4> -->
+            <img src="{% static 'logo.png'%}" alt="" width="220px" height="80px">
           </a>
           <div class="close-btn d-xl-none d-block sidebartoggler cursor-pointer" id="sidebarCollapse">
             <i class="ti ti-x fs-8"></i>
@@ -104,45 +113,33 @@
         </div>
         <nav class="sidebar-nav scroll-sidebar" data-simplebar="">
           <ul id="sidebarnav">
-            <li class="nav-small-cap">
-              <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
-              <span class="hide-menu">Home</span>
-            </li>
             <li class="sidebar-item">
-              <a class="sidebar-link" href="./index.html" aria-expanded="false">
+              <a class="sidebar-link" href="#" aria-expanded="false" method="GET" enctype="multipart/form-data" >
                 <span>
-                  <i class="ti ti-layout-dashboard"></i>
+                  <i class="fa-solid fa-chart-simple"></i>
                 </span>
                 <span class="hide-menu">Dashboard</span>
               </a>
             </li>
-            <li class="nav-small-cap">
-              <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
-              <span class="hide-menu">Others</span>
-            </li>
+            <br>
             <li class="sidebar-item">
               <a class="sidebar-link" href="./ui-buttons.html" aria-expanded="false">
                 <span>
-                  <i class="ti ti-article"></i>
+                  <i class="fa-solid fa-chart-line"></i>
                 </span>
-                <span class="hide-menu">Buttons</span>
+                <span class="hide-menu">Insights</span>
               </a>
             </li>
+            <br>
             <li class="sidebar-item">
-              <a class="sidebar-link" href="./ui-alerts.html" aria-expanded="false">
-                <span>
-                  <i class="ti ti-alert-circle"></i>
-                </span>
-                <span class="hide-menu">Alerts</span>
-              </a>
-            </li>
-            <li class="sidebar-item">
-              <a class="sidebar-link" href="./ui-card.html" aria-expanded="false">
-                <span>
-                  <i class="ti ti-cards"></i>
-                </span>
-                <span class="hide-menu">Card</span>
-              </a>
+              <form action="{% url 'home' %}" class="" method="GET" enctype="multipart/form-data" id="upload-form">
+                <a class="sidebar-link" id="cancel-button" onclick="cancelUpload()" value="Back" aria-expanded="false">
+                  <span>
+                    <i class="fa-solid fa-backward"></i>
+                  </span>
+                  <span class="hide-menu">Back</span>
+                </a>
+              </form>
             </li>
           </ul>
         </nav>
@@ -552,6 +549,7 @@
     </div>
 </div>
 
+<script src="{% static 'sidebarmenu.js' %}"> </script>
 
   <script>
     function generateRandomColors(numColors) {
