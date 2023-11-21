@@ -129,6 +129,8 @@ def get_chart_data(log_csv):
     # print("Rulekskkskdks",output_testInput)
     labels = checker_columns.tolist()
     data = rule_violations.tolist()
+    print(labels)
+    print(data)
     return {
             'labels': labels, 
             'data': data, 
@@ -219,7 +221,7 @@ def get_chart_data7(log_csv):
 
     percent_violations = (rule_violations.sum() / total_data_points) * 100
     percent_non_violations = 100 - percent_violations
-
+    print("total: ", total_data_points)
     return {
         'labels': ['Violations', 'Non-violations'],
         'data': [percent_violations, percent_non_violations],
