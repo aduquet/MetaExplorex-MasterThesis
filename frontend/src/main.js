@@ -1,0 +1,26 @@
+import { createApp } from 'vue'
+import App from './App.vue'
+// import router from './router';
+import { createRouter, createWebHistory } from 'vue-router'
+import HomePage from '@/components/HomePage'
+import DashboardPage from '@/components/DashboardPage'
+
+const routes = [
+    {
+      path: '/',
+      name: 'Home',
+      component: HomePage,
+    },
+    {
+      path: '/dashboard',
+      name: 'Dashboard',
+      component: DashboardPage,
+    },
+  
+  ];
+  
+  const router = createRouter({
+    history: createWebHistory(),
+    routes,
+  });
+createApp(App).use(router).mount('#app');
