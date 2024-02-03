@@ -13,8 +13,9 @@ from django.utils.decorators import method_decorator
 @method_decorator(csrf_exempt, name='dispatch')
 class DashboardView(APIView):
     def post(self, request, *args, **kwargs):
-        num_mrs = request.data.get('num_mrs')
+        num_mrs = request.data.get('num_mrs') 
         file_type = request.data.get('file_type')
+
 
         request.num_mrs = num_mrs
         request.file_type = file_type
@@ -22,10 +23,11 @@ class DashboardView(APIView):
         print(num_mrs, file_type)
         return JsonResponse({'message': 'Data received successfully.'})
 
+@api_view(['GET', 'POST'])
 def process_chart_data(request, get_chart_data_func):
     try:
-        # num_mrs = request.num_mrs
-        # file_type = request.file_type
+        # num_mrs = request.data.get('num_mrs')
+        # file_type = request.data.get('file_type')
 
         # print("2", num_mrs, file_type)
 
@@ -40,7 +42,7 @@ def process_chart_data(request, get_chart_data_func):
         uploaded_file = 'C:/Users/Murad/Desktop/Django_apps/metaexplorex/test.csv'
         if not uploaded_file:
             return Response({'error': 'No file uploaded.'}, status=status.HTTP_400_BAD_REQUEST)
-
+        
         log_csv = pd.read_csv(uploaded_file)
         is_multiple_type = file_type == 'multiple'
         missing_columns = get_missing_columns(log_csv, is_multiple_type, int(num_mrs))
@@ -59,32 +61,32 @@ def process_chart_data(request, get_chart_data_func):
         return Response({'error': 'Something went wrong. Check your file and try again.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-@api_view(['GET'])
+# @api_view(['GET'])
 def chart_data_api(request):
     return process_chart_data(request, get_chart_data)
 
-@api_view(['GET'])
+# @api_view(['GET'])
 def chart_data2_api(request):
     return process_chart_data(request, get_chart_data2)
 
-@api_view(['GET'])
+# @api_view(['GET'])
 def chart_data3_api(request):
     return process_chart_data(request, get_chart_data3)
 
-@api_view(['GET'])
+# @api_view(['GET'])
 def chart_data4_api(request):
     return process_chart_data(request, get_chart_data4)
 
 
-@api_view(['GET'])
+# @api_view(['GET'])
 def chart_data5_api(request):
     return process_chart_data(request, get_chart_data5)
 
-@api_view(['GET'])
+# @api_view(['GET'])
 def chart_data6_api(request):
     return process_chart_data(request, get_chart_data6)
 
-@api_view(['GET'])
+# @api_view(['GET'])
 def chart_data7_api(request):
     return process_chart_data(request, get_chart_data7)
 

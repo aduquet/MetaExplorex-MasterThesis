@@ -3,6 +3,7 @@ import App from './App.vue'
 import { createRouter, createWebHistory } from 'vue-router'
 import HomePage from '@/components/HomePage'
 import DashboardPage from '@/components/DashboardPage'
+import FileUpload from '@/components/FileUpload'
 
 const app = createApp(App);
 
@@ -16,6 +17,11 @@ const routes = [
     path: '/dashboard',
     name: 'Dashboard',
     component: DashboardPage,
+  },
+  {
+    path:'/fileupload',
+    name: 'FileUpload',
+    component: FileUpload,
   },
 
 ];

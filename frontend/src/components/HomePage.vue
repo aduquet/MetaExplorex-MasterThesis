@@ -1,7 +1,6 @@
 <template>
   <div>
     <h1>MetaExploreX</h1>
-     <router-link to="/dashboard">Go to Dashboard </router-link>
     <router-view />
     <form @submit.prevent="submitForm" class="analysis-options" id="upload-form">
       <div>
@@ -15,7 +14,9 @@
       <br>
       <label>How many MRs will be in the log file?</label>
       <input v-model="numMRs" type="number" placeholder="Enter the number of MRs" class="form-control" required>
-      <button type="submit" class="btn btn-primary pt-3" id="upload-button" >Next</button>
+     <router-link to="/fileupload">
+        <button type="submit" class="btn btn-primary pt-3" id="upload-button" >Next</button>
+     </router-link>
     </form>
   </div>
 </template>
@@ -32,16 +33,17 @@ export default {
   },
   methods: {
     submitForm() {
-        axios.post('http://127.0.0.1:8000/submit-form/', { num_mrs: this.numMRs, file_type: this.fileType })
-        .then(response => {
+      axios.post('http://127.0.0.1:8000/process_chart_data/', { num_mrs: this.numMRs, file_type: this.fileType }, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+      .then(response => {
         console.log(response.data.message);
-        // this.$router.push('/dashboard');
       })
       .catch(error => {
         console.error(error);
       });
-        console.log(this.numMRs, this.fileType)
-
     },
   },
 };
