@@ -13,9 +13,10 @@
         <!-- <input type="hidden" name="csrfmiddlewaretoken" :value="csrfToken"> -->
         <label for="file">Choose Log file</label>
         <input type="file" name="file" id="file" accept=".csv" @change="onFileChange">
-        <router-link to="/dashboard">
+        <router-link :to="{ path: '/dashboard', query: { selectedFile: 'C:/Users/Murad/Desktop/Django_apps/metaexplorex/' + selectedFile } }">
           <button type="submit" id="upload-button" @click="submitForm">Upload and Process</button>
         </router-link>
+
       </form>
     </div>
   </div>
@@ -24,37 +25,43 @@
 <script>
 import axios from 'axios';
 export default {
-
   data() {
     return {
       selectedFile: null,
-      numMRs: this.$route.params.numMRs,
-      fileType: this.$route.params.fileType,
+      numMRs: this.$route.query.numMRs,
+      fileType: this.$route.query.fileType,
     };
-  },
+},
+
   methods: {
     submitForm() {
-      const formData = new FormData();
-      formData.append('file', this.selectedFile);
-      formData.append('num_mrs', this.numMRs);
-      formData.append('file_type', this.fileType);
-
-      axios.post('http://127.0.0.1:8000/process_chart_data/', formData)
-        .then(response => {
-          console.log(response.data.message);
-        })
-        .catch(error => {
-          console.error(error);
-        });
-    },
-
+    const formData = new FormData();
+    formData.append('file', this.selectedFile);
+    formData.append('num_mrs', this.numMRs);
+    formData.append('file_type', this.fileType);
+    axios.post('http://127.0.0.1:8000/process_chart_data/', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+  })
+    .then(response => {
+      console.log(response.data.message);
+      // Navigate to the new route here if needed
+      this.$router.push({ path: '/dashboard', query: { selectedFile: this.selectedFile } });
+    })
+    .catch(error => {
+      console.error(error);
+    });
+},
     onFileChange(event) {
-    this.selectedFile = event.target.files[0];
+      this.selectedFile = event.target.files[0].name;
   },
   },
   created() {
+    console.log("Values: ", this.numMRs, this.fileType, this.selectedFile);
     this.numMRs = this.$route.params.numMRs;
     this.fileType = this.$route.params.fileType;
+    this.selectedFile = this.$route.query.selectedFile;
   },
 };
 </script>

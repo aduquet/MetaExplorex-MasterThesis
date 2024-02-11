@@ -22,16 +22,12 @@ class DashboardView(APIView):
         
         print(num_mrs, file_type)
         return JsonResponse({'message': 'Data received successfully.'})
-
+    
 @api_view(['GET', 'POST'])
 def process_chart_data(request, get_chart_data_func):
     try:
         # num_mrs = request.data.get('num_mrs')
         # file_type = request.data.get('file_type')
-
-        # print("2", num_mrs, file_type)
-
-
         num_mrs = 8
         file_type = 'single'
 
@@ -40,6 +36,7 @@ def process_chart_data(request, get_chart_data_func):
         
         # uploaded_file = request.data.get('file')
         uploaded_file = 'C:/Users/Murad/Desktop/Django_apps/metaexplorex/test.csv'
+        print("2", num_mrs, file_type, uploaded_file)
         if not uploaded_file:
             return Response({'error': 'No file uploaded.'}, status=status.HTTP_400_BAD_REQUEST)
         
@@ -49,7 +46,7 @@ def process_chart_data(request, get_chart_data_func):
 
         if missing_columns:
             return Response({'error': f'Missing columns in log file: {", ".join(missing_columns)}'}, status=status.HTTP_400_BAD_REQUEST)
-
+        
         chart_data = get_chart_data_func(log_csv)
         serializer = ChartDataSerializer(chart_data)
         return Response(serializer.data)
@@ -89,6 +86,21 @@ def chart_data6_api(request):
 # @api_view(['GET'])
 def chart_data7_api(request):
     return process_chart_data(request, get_chart_data7)
+
+@api_view(['GET'])
+def fetch_random_data_api(request):
+    try:
+        uploaded_file = 'C:/Users/Murad/Desktop/Django_apps/metaexplorex/test.csv'
+        log_csv = pd.read_csv(uploaded_file)
+        # Get the offset from request query parameters, default to 0 if not provided
+        offset = int(request.query_params.get('offset', 0))
+        # Call fetchRandomData with the offset
+        random_data = fetchRandomData(log_csv, offset=offset)
+        return JsonResponse({'random_data': random_data})
+    except pd.errors.EmptyDataError as e:
+        return Response({'error': 'The uploaded file is empty or in an unsupported format.'}, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        return Response({'error': 'Something went wrong. Check your file and try again.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 def get_missing_columns(log_csv, is_multiple_type, num_mrs):
     all_columns = log_csv.columns
@@ -248,3 +260,13 @@ def get_chart_data7(log_csv):
         'total_data_points': total_data_points,
     }
     return chart_data
+
+
+def fetchRandomData(log_csv, offset=0, limit=50):
+    # Calculate the end index based on the offset and limit
+    end = offset + limit
+    if len(log_csv) >= 50:
+        random_data = log_csv.sample(n=50).to_dict('records')
+    else:
+        random_data = log_csv.to_dict('records')
+    return random_data

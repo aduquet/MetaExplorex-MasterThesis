@@ -14,9 +14,9 @@
       <br>
       <label>How many MRs will be in the log file?</label>
       <input v-model="numMRs" type="number" placeholder="Enter the number of MRs" class="form-control" required>
-     <router-link to="/fileupload">
-        <button type="submit" class="btn btn-primary pt-3" id="upload-button" >Next</button>
-     </router-link>
+     <router-link :to="{ path: '/fileupload', query: { numMRs, fileType } }">
+      <button type="submit" class="btn btn-primary pt-3" id="upload-button">Next</button>
+    </router-link>
     </form>
   </div>
 </template>
@@ -33,12 +33,12 @@ export default {
   },
   methods: {
     submitForm() {
-      axios.post('http://127.0.0.1:8000/process_chart_data/', { num_mrs: this.numMRs, file_type: this.fileType }, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
+      axios.post('http://127.0.0.1:8000/process_chart_data/', {
+      num_mrs: this.numMRs,
+      file_type: this.fileType,
+    })
       .then(response => {
+        this.$router.push({ path: '/fileupload', query: { numMRs: this.numMRs, fileType: this.fileType } });
         console.log(response.data.message);
       })
       .catch(error => {

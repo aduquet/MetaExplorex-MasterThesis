@@ -30,6 +30,8 @@ urlpatterns = [
     path('chart7/', chart_data7_api, name='chart-data7'),  
     path('process_chart_data/', process_chart_data, name='process_chart_data'), 
     path('submit-form/', DashboardView.as_view(), name='submit-form'),
+    path('fetch_random_data/', fetch_random_data_api, name='fetch-random-data'),
+
 
 #     path('', HomeView.as_view(), name='homepage'),
 #     path('file/', FileUploadView.as_view(), name='fileuploadpage'),
