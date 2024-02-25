@@ -360,14 +360,8 @@ export default {
       isViolated: "Both",
       randomData: [],
       columnsNames: [],
-      allColumns: [
-        'MR1', 'MR2', 'MR3', 'MR4',
-        'MR5', 'MR6', 'MR7', 'MR8'
-      ],
-      selectedColumns: [
-        'MR1', 'MR2', 'MR3', 'MR4',
-        'MR5', 'MR6', 'MR7', 'MR8'
-      ],
+      allColumns: [],
+      selectedColumns: [],
       currentOffset: 0,
       selectedFile: this.$route.query.selectedFile,
       chartData1: {
@@ -418,7 +412,6 @@ export default {
         labels: [],
         datasets: [
           {
-            // label: 'Number of Violations',
             data: [],
             backgroundColor: [],
             borderWidth: 1,
@@ -429,7 +422,6 @@ export default {
         labels: [],
         datasets: [
           {
-            // label: 'Number of Violations',
             data: [],
             backgroundColor: [],
             borderWidth: 1,
@@ -509,6 +501,7 @@ export default {
       } catch (error) {
         console.error('Error fetching chart data:', error);
       }
+  console.log(this.$route.query.numMRs);
     },
 
     async fetchChart2Data() {
@@ -831,6 +824,9 @@ export default {
         this.numberOfViolatedRows = insights.violated_rows;
         this.numberOfNotViolatedRows = insights.not_violated_rows;
         this.numberOfCrashedRows = insights.crashed_rows;
+        this.columnsNames = insights.mr_columns;
+        this.allColumns = insights.mr_columns;
+        this.selectedColumns = insights.mr_columns;
         console.log("numberofRows: ", this.numberOfRows);
       })
       .catch(error => {
@@ -868,16 +864,13 @@ export default {
       console.log('Chart clicked', this.isViolated);
       this.isViolated = data.isViolated;
       if (data.chartData == "validation/non-validation") {
-        this.columnsNames = [
-          'MR1_checker', 'MR2_checker', 'MR3_checker', 'MR4_checker', 'MR5_checker', 'MR6_checker',
-          'MR7_checker', 'MR8_checker'
-        ];
+        // this.columnsNames = [
+        //   'MR1_checker', 'MR2_checker', 'MR3_checker', 'MR4_checker', 'MR5_checker', 'MR6_checker',
+        //   'MR7_checker', 'MR8_checker'
+        // ];
       } else {
-
-
         this.columnsNames = data.chartData?.labels;
       }
-
       this.showFirstPopup = true;
     },
 

@@ -88,7 +88,7 @@ def chart_data7_api(request):
 @api_view(['GET'])
 def fetch_random_data_api(request):
     try:
-        uploaded_file = 'C:/Users/Murad/Desktop/Django_apps/metaexplorex/test.csv'
+        uploaded_file = '../metaexplorex/test.csv'
         log_csv = pd.read_csv(uploaded_file)
         offset = int(request.query_params.get('offset', 0))
         random_data = fetchRandomData(log_csv, offset=offset)
@@ -101,7 +101,7 @@ def fetch_random_data_api(request):
 @api_view(["GET"])
 def fetch_insights_api(request):
     try:
-        uploaded_file = 'C:/Users/Murad/Desktop/Django_apps/metaexplorex/test.csv'
+        uploaded_file = '../metaexplorex/test.csv'
         log_csv = pd.read_csv(uploaded_file)
         insights = fetchInsights(log_csv)
         return JsonResponse({'insights': insights})
@@ -281,17 +281,20 @@ def fetchRandomData(log_csv, offset=0, limit=50):
     return random_data
 
 def fetchInsights(log_csv):
+    num_mrs = 8
     total_rows = int(len(log_csv))
     checker_columns = log_csv.filter(like='_checker').columns
     violated_rows = int(log_csv[checker_columns].apply(lambda x: (x == 'Violated').sum()).sum())
     not_violated_rows = int(log_csv[checker_columns].apply(lambda x: (x == 'Not-violated').sum()).sum())
     crashed_rows = int(log_csv[checker_columns].apply(lambda x: x[~x.isin(['Violated', 'Not-violated'])].count()).sum())
+    mr_columns = [f"MR{i}" for i in range(1, num_mrs + 1)] if num_mrs > 1 else ["MR"]
 
     insights = {
         'total_rows': total_rows,
         'violated_rows': violated_rows,
         'not_violated_rows': not_violated_rows,
         'crashed_rows': crashed_rows,
+        'mr_columns': mr_columns
     }
     print('Insights: ', insights)
     return insights
