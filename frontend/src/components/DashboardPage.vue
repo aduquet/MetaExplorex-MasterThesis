@@ -240,24 +240,37 @@
       </div>
     </div>
   </div>
-  <div v-if="showFirstPopup" class="popup">
-    <div style="display: flex;">
-
-      <div>
-
-        <button @click="showColumnPopup = true" style="height: 50px;">MR Selection</button>
-        <p>Check file type</p>
+  <div v-if="showFirstPopup" class="popup container">
+    <div class="row">
+      <div class="insights-container col-md-4">
+      <div class="insight">
+        <label>Number of rows: </label>
+        <span>{{ numberOfRows }}</span>
       </div>
+      <div class="insight">
+        <label>Number of violated rows: </label>
+        <span>{{ numberOfViolatedRows }}</span>
+      </div>
+      <div class="insight">
+        <label>Number of not-violated rows: </label>
+        <span>{{ numberOfNotViolatedRows }}</span>
+      </div>
+      <div class="insight">
+        <label>Number of crashed rows: </label>
+        <span>{{ numberOfCrashedRows }}</span>
+      </div>
+    </div>
+    <div class="popup_filtering col-md-4">
+      <button @click="showColumnPopup = true" style="height: 50px;">MR Selection</button>
       <button v-if="isViolated == 'Both'" @click="isViolated = 'Violated'" style="height: 50px;">Both</button>
       <button v-if="isViolated == 'Violated'" @click="isViolated = 'Not-violated'" style="height: 50px;">Violated</button>
       <button v-if="isViolated == 'Not-violated'" @click="isViolated = 'Both'" style="height: 50px;">Not-violated</button>
-
     </div>
     <button class="bottom-right" @click="onProceedClick">Proceed</button>
+    </div>
   </div>
   <div v-if="showSecondPopup" class="popup">
     <div class="table-container">
-
       <table>
         <tr>
           <th>
@@ -337,6 +350,10 @@ import Chart from 'chart.js/auto';
 export default {
   data() {
     return {
+      numberOfRows: 0,
+      numberOfViolatedRows: 0,
+      numberOfNotViolatedRows: 0,
+      numberOfCrashedRows: 0,
       showFirstPopup: false,
       showSecondPopup: false,
       showColumnPopup: false,
@@ -463,9 +480,7 @@ export default {
     this.fetchChart5Data();
     this.fetchChart6Data();
     this.fetchChart7Data();
-    // this.showFirstPopup = true;
-    // this.fetchRandomData();
-    // this.showSecondPopup = true;
+    this.fetchInsights();
   },
   methods: {
     generateRandomColors(numColors) {
@@ -807,8 +822,23 @@ export default {
       });
     },
 
+    fetchInsights() {
+    axios.get('http://127.0.0.1:8000/fetch_insights') 
+      .then(response => {
+        const insights = response.data.insights;
+        console.log("Data insighst:", insights );
+        this.numberOfRows = insights.total_rows;
+        this.numberOfViolatedRows = insights.violated_rows;
+        this.numberOfNotViolatedRows = insights.not_violated_rows;
+        this.numberOfCrashedRows = insights.crashed_rows;
+        console.log("numberofRows: ", this.numberOfRows);
+      })
+      .catch(error => {
+        console.error('Error fetching insights:', error);
+      });
+  },
 
-    fetchRandomData() {
+  fetchRandomData() {
       axios.get(`http://127.0.0.1:8000/fetch_random_data/?isViolated=${this.isViolated}`)
         .then(response => {
           console.log('Random data:', response.data)
@@ -820,12 +850,10 @@ export default {
     },
 
     loadMore() {
-      // Example assumes you have a way to track which rows to fetch next, e.g., offset or page number
-      this.currentOffset += 5; // Assuming 'currentOffset' keeps track of your position in the dataset
+      this.currentOffset += 5; 
 
       axios.get(`http://127.0.0.1:8000/fetch_random_data/?offset=${this.currentOffset}&isViolated=${this.isViolated}`)
         .then(response => {
-          // Concatenate the new rows with the existing rows
           this.randomData = this.randomData.concat(response.data?.random_data);
         })
         .catch(error => {
@@ -850,14 +878,15 @@ export default {
         this.columnsNames = data.chartData?.labels;
       }
 
-      this.showFirstPopup = true; // Make sure you have a data property 'showFirstPopup' initialized as false
+      this.showFirstPopup = true;
     },
 
+
     onProceedClick() {
-      this.showFirstPopup = false; // Close the first popup
-      this.fetchRandomData(); // Assume this method fetches random data and sets 'randomData'
-      this.updateColumns(); // Update the columns
-      this.showSecondPopup = true; // Make sure you have a data property 'showSecondPopup' initialized as false
+      this.showFirstPopup = false; 
+      this.fetchRandomData(); 
+      this.updateColumns(); 
+      this.showSecondPopup = true; 
     },
     updateColumns() {
       this.columnsNames = [...this.selectedColumns];
@@ -886,106 +915,159 @@ canvas {
 
 .popup {
   background-color: #ffffff;
-  /* Light background for better contrast */
   border-radius: 10px;
-  /* Rounded corners */
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1), 0 6px 20px rgba(0, 0, 0, 0.1);
-  /* Soft shadow for depth */
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: space-around;
   height: 80vh;
   width: 60vw;
-  /* Adjusted for a more centered look */
   position: fixed;
-  /* Fixed to stay in view on scroll */
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  /* Centering the popup */
   padding: 20px;
   overflow: hidden;
-  /* Ensures no internal overflow */
   z-index: 1000;
-  /* Ensure it's above other content */
 }
 
-.popup button,
+.insights-container,
+.popup_filtering {
+  width: 100%;
+  margin-bottom: 20px;
+}
+
 .bottom-right {
   background-color: #007BFF;
-  /* Primary button color */
   color: #ffffff;
   border: none;
   border-radius: 5px;
   padding: 10px 20px;
-  margin: 10px;
+  margin: 10px auto;
+  display: block;
   cursor: pointer;
   font-size: 16px;
   transition: background-color 0.3s, color 0.3s, border-color 0.3s;
 }
 
-.popup button:hover,
 .bottom-right:hover {
   background-color: #0056b3;
-  /* Darker shade on hover */
   color: #ffffff;
   border: 1px solid #0056b3;
 }
 
 .table-container {
   overflow-y: auto;
-  max-height: 50vh;
-  /* Adjusted to take up half of the popup height */
+  overflow-x: auto;
   width: 100%;
-  /* Utilize full width of the popup */
+  height: 100%;
   margin-top: 20px;
-  border: 1px solid #ddd;
-  /* Light border for the container */
+  border: 1px solid #dee2e6;
   border-radius: 5px;
-  /* Consistent rounded corners */
 }
 
 .popup table {
-  border-collapse: collapse;
   width: 100%;
+  border-collapse: collapse;
   background-color: #f8f9fa;
-  /* Slightly off-white background for the table */
 }
 
 .popup th,
 .popup td {
+  padding: 12px 15px;
   text-align: left;
-  padding: 8px;
-  border-bottom: 1px solid #ddd;
-  /* Light borders for table rows */
+  border-bottom: 1px solid #dee2e6;
 }
 
 .popup th {
-  background-color: #007BFF;
-  /* Header background */
-  color: white;
-  /* Light text for headers */
-  font-weight: normal;
+  background-color: #007bff;
+  color: #ffffff;
+  font-weight: bold;
 }
 
-/* Scrollbar styles */
+.popup tr:hover {
+  background-color: #f2f2f2;
+}
+
 .table-container::-webkit-scrollbar {
-  width: 5px;
-  /* Scrollbar width */
+  width: 6px;
 }
 
 .table-container::-webkit-scrollbar-track {
   background: #f1f1f1;
-  /* Track color */
 }
 
 .table-container::-webkit-scrollbar-thumb {
   background: #888;
-  /* Scrollbar handle color */
 }
 
 .table-container::-webkit-scrollbar-thumb:hover {
   background: #555;
-  /* Handle hover color */
-}</style>
+}
+
+.insights-container {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  max-width: 400px;
+  margin: auto;
+}
+
+.insight {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  padding: 10px;
+  background-color: #f9f9f9;
+  border-radius: 5px;
+}
+
+.insight label {
+  font-weight: bold;
+  color: #333;
+}
+
+.insight span {
+  background-color: #e7f5ff;
+  color: #0366d6;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-weight: bold;
+}
+
+.popup_filtering {
+  justify-content: center;
+  align-items: center;
+  margin-top: 40px;
+  padding: 15px;
+  border-radius: 8px;
+  background-color: #f8f9fa;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding-left: 320px;
+}
+
+.popup button {
+  height: 50px;
+  padding: 0 20px;
+  margin: 20px;
+  font-size: 16px;
+  color: #fff;
+  background-color: #007bff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.popup_filtering > button:hover {
+  background-color: #0056b3;
+}
+
+.popup_filtering > button:focus {
+  outline: none;
+}
+
+</style>

@@ -18,6 +18,8 @@ from django.contrib import admin
 from django.urls import path
 from .views import *  
 from django.views.generic import TemplateView
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -29,11 +31,14 @@ urlpatterns = [
     path('chart6/', chart_data6_api, name='chart-data6'),  
     path('chart7/', chart_data7_api, name='chart-data7'),  
     path('process_chart_data/', process_chart_data, name='process_chart_data'), 
-    path('submit-form/', DashboardView.as_view(), name='submit-form'),
+    path('dashboard/', dashboard, name='dashboard'),
+    path('home', TemplateView.as_view(template_name="home.html"), name='homepage'), 
     path('fetch_random_data/', fetch_random_data_api, name='fetch-random-data'),
+    path('fetch_insights/', fetch_insights_api, name='fetch-insights'),
 
 
 #     path('', HomeView.as_view(), name='homepage'),
 #     path('file/', FileUploadView.as_view(), name='fileuploadpage'),
 #     path('charts/', ChartsView.as_view(), name='chartspage')
 ]
+urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

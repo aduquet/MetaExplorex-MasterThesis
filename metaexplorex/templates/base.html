@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Your Website Title{% endblock %}</title>
+    <!-- Include any CSS or meta tags that you want to appear in the <head> section -->
+    {% block head %}
+    {% endblock %}
+</head>
+<body>
+    <header>
+        <!-- Your header content here -->
+        <h1>Your Website Header</h1>
+        <nav>
+            <!-- Your navigation menu here -->
+            <ul>
+                <li><a href="/">Home</a></li>
+                <li><a href="/about/">About</a></li>
+                <!-- Add more links as needed -->
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <!-- The main content of each page will go here -->
+        {% block content %}
+        {% endblock %}
+    </main>
+    <footer>
+        <!-- Your footer content here -->
+        <p>&copy; 2024 Your Website Name. All rights reserved.</p>
+    </footer>
+    <!-- Include any JavaScript files that you want to appear at the end of the <body> section -->
+    {% block scripts %}
+    {% endblock %}
+</body>
+</html>

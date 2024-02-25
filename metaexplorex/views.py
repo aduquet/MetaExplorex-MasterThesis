@@ -9,24 +9,22 @@ from django.views.generic import TemplateView
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
+from django.shortcuts import render
 
-@method_decorator(csrf_exempt, name='dispatch')
-class DashboardView(APIView):
-    def post(self, request, *args, **kwargs):
-        num_mrs = request.data.get('num_mrs') 
-        file_type = request.data.get('file_type')
+@api_view(['GET'])
+def dashboard(request, *args, **kwargs):
+    num_mrs = request.query_params.get('num_mrs') 
+    file_type = request.query_params.get('file_type')
+    selected_file = request.query_params.get('selectedFile')
+    
+    print("values: ", num_mrs, file_type, selected_file)
+    return JsonResponse({'message': 'Data received successfully.'})
 
-
-        request.num_mrs = num_mrs
-        request.file_type = file_type
-        
-        print(num_mrs, file_type)
-        return JsonResponse({'message': 'Data received successfully.'})
     
 @api_view(['GET', 'POST'])
 def process_chart_data(request, get_chart_data_func):
     try:
-        # num_mrs = request.data.get('num_mrs')
+        # num_mrs = request.data.get('num_mrs') 
         # file_type = request.data.get('file_type')
         num_mrs = 8
         file_type = 'single'
@@ -35,7 +33,7 @@ def process_chart_data(request, get_chart_data_func):
             return Response({'error': 'Number of MRs is missing.'}, status=status.HTTP_400_BAD_REQUEST)
         
         # uploaded_file = request.data.get('file')
-        uploaded_file = 'C:/Users/Murad/Desktop/Django_apps/metaexplorex/test.csv'
+        uploaded_file = '../metaexplorex/test.csv'
         print("2", num_mrs, file_type, uploaded_file)
         if not uploaded_file:
             return Response({'error': 'No file uploaded.'}, status=status.HTTP_400_BAD_REQUEST)
@@ -92,9 +90,7 @@ def fetch_random_data_api(request):
     try:
         uploaded_file = 'C:/Users/Murad/Desktop/Django_apps/metaexplorex/test.csv'
         log_csv = pd.read_csv(uploaded_file)
-        # Get the offset from request query parameters, default to 0 if not provided
         offset = int(request.query_params.get('offset', 0))
-        # Call fetchRandomData with the offset
         random_data = fetchRandomData(log_csv, offset=offset)
         return JsonResponse({'random_data': random_data})
     except pd.errors.EmptyDataError as e:
@@ -102,6 +98,20 @@ def fetch_random_data_api(request):
     except Exception as e:
         return Response({'error': 'Something went wrong. Check your file and try again.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+@api_view(["GET"])
+def fetch_insights_api(request):
+    try:
+        uploaded_file = 'C:/Users/Murad/Desktop/Django_apps/metaexplorex/test.csv'
+        log_csv = pd.read_csv(uploaded_file)
+        insights = fetchInsights(log_csv)
+        return JsonResponse({'insights': insights})
+    
+    except pd.errors.EmptyDataError as e:
+       return Response({'error': 'The uploaded file is empty or in an unsupported format.'}, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        print(str(e))
+        return Response({'error': 'Something went wrong. Check your file and try again.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
 def get_missing_columns(log_csv, is_multiple_type, num_mrs):
     all_columns = log_csv.columns
 
@@ -263,10 +273,25 @@ def get_chart_data7(log_csv):
 
 
 def fetchRandomData(log_csv, offset=0, limit=50):
-    # Calculate the end index based on the offset and limit
     end = offset + limit
     if len(log_csv) >= 50:
         random_data = log_csv.sample(n=50).to_dict('records')
     else:
         random_data = log_csv.to_dict('records')
     return random_data
+
+def fetchInsights(log_csv):
+    total_rows = int(len(log_csv))
+    checker_columns = log_csv.filter(like='_checker').columns
+    violated_rows = int(log_csv[checker_columns].apply(lambda x: (x == 'Violated').sum()).sum())
+    not_violated_rows = int(log_csv[checker_columns].apply(lambda x: (x == 'Not-violated').sum()).sum())
+    crashed_rows = int(log_csv[checker_columns].apply(lambda x: x[~x.isin(['Violated', 'Not-violated'])].count()).sum())
+
+    insights = {
+        'total_rows': total_rows,
+        'violated_rows': violated_rows,
+        'not_violated_rows': not_violated_rows,
+        'crashed_rows': crashed_rows,
+    }
+    print('Insights: ', insights)
+    return insights
