@@ -1,4 +1,4 @@
-name: Python application CI/CD
+name: Django & Vue.js application CI/CD
 
 on:
   push:
@@ -9,7 +9,7 @@ on:
       - rest_api_version_dont_merge
 
 jobs:
-  build-and-test:
+  backend:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -21,36 +21,55 @@ jobs:
       uses: actions/setup-python@v2
       with:
         python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
+    - name: Install backend dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
+    - name: Run Django migrations
+      run: python manage.py migrate
     - name: Lint with Flake8
       run: |
         pip install flake8
-        # stop the build if there are Python syntax errors or undefined names
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-    - name: Test with Pytest
+        flake8 .
+    - name: Test Django with Pytest
       run: |
-        pip install pytest
+        pip install pytest-django
         pytest
 
+  frontend:
+    needs: backend
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '16' 
+    - name: Install frontend dependencies
+      run: |
+        cd /frontend/
+        npm install
+    - name: Lint Vue.js project
+      run: |
+        cd /frontend/
+        npm run lint
+    - name: Build Vue.js project
+      run: |
+        cd /frontend/
+        npm run build
+    - name: Test Vue.js project
+      run: |
+        cd /frontend/
+        npm run test
+
   deploy:
-    needs: build-and-test
+    needs: frontend
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/rest_api_version_dont_merge' && github.event_name == 'push'
     steps:
     - uses: actions/checkout@v2
-    - name: Set up Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.8
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-    # Add your deployment step here
-    - name: Deploy to Production
-      run: echo "Add your deployment commands here."
+    - name: Deploy Backend
+      run: echo "Add your backend deployment commands here."
+    - name: Deploy Frontend
+      run: echo "Add your frontend deployment commands here."
