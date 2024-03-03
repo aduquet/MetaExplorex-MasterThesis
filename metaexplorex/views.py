@@ -33,7 +33,7 @@ def process_chart_data(request, get_chart_data_func):
             return Response({'error': 'Number of MRs is missing.'}, status=status.HTTP_400_BAD_REQUEST)
         
         # uploaded_file = request.data.get('file')
-        uploaded_file = '../metaexplorex/test.csv'
+        uploaded_file = '../metaexplorex/expanded_test.csv'
         print("2", num_mrs, file_type, uploaded_file)
         if not uploaded_file:
             return Response({'error': 'No file uploaded.'}, status=status.HTTP_400_BAD_REQUEST)
@@ -88,8 +88,8 @@ def chart_data7_api(request):
 @api_view(['GET'])
 def fetch_random_data_api(request):
     try:
-        uploaded_file = '../metaexplorex/test.csv'
-        log_csv = pd.read_csv(uploaded_file)
+        uploaded_file = '../metaexplorex/expanded_test.csv'
+        log_csv = pd.read_csv(uploaded_file, low_memory=False)
         offset = int(request.query_params.get('offset', 0))
         random_data = fetchRandomData(log_csv, offset=offset)
         return JsonResponse({'random_data': random_data})
@@ -101,8 +101,8 @@ def fetch_random_data_api(request):
 @api_view(["GET"])
 def fetch_insights_api(request):
     try:
-        uploaded_file = '../metaexplorex/test.csv'
-        log_csv = pd.read_csv(uploaded_file)
+        uploaded_file = '../metaexplorex/expanded_test.csv'
+        log_csv = pd.read_csv(uploaded_file, low_memory=False)
         insights = fetchInsights(log_csv)
         return JsonResponse({'insights': insights})
     
@@ -296,5 +296,4 @@ def fetchInsights(log_csv):
         'crashed_rows': crashed_rows,
         'mr_columns': mr_columns
     }
-    print('Insights: ', insights)
     return insights

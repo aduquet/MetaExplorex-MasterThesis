@@ -6,7 +6,7 @@
         <div class="brand-logo d-flex align-items-center justify-content-between">
           <a href="#" class="text-nowrap">
             <!-- <h4>MetaExploreX</h4> -->
-            <img src="frontend\src\assets\logo.png" alt="" width="220px" height="80px">
+            <img src="@/assets/logo.png" alt="" width="220px" height="80px">
           </a>
           <div class="close-btn d-xl-none d-block sidebartoggler cursor-pointer" id="sidebarCollapse">
             <i class="ti ti-x fs-8"></i>
@@ -14,21 +14,17 @@
         </div>
         <nav class="sidebar-nav scroll-sidebar" data-simplebar="">
           <ul id="sidebarnav">
-            <li class="sidebar-item">
-              <a class="sidebar-link" href="#" aria-expanded="false" method="GET" enctype="multipart/form-data">
-                <span>
-                  <i class="fa-solid fa-chart-simple"></i>
-                </span>
+            <li class="sidebar-item" :class="{ active: currentView === 'dashboard' }">
+              <a class="sidebar-link" @click="currentView = 'dashboard'" aria-expanded="false">
+                <i class="fa-solid fa-chart-simple"></i>
                 <span class="hide-menu">Dashboard</span>
               </a>
             </li>
             <br>
-            <li class="sidebar-item">
-              <a class="sidebar-link" href="" aria-expanded="false">
-                <span>
-                  <i class="fa-solid fa-chart-line"></i>
-                </span>
-                <span class="hide-menu">Insights</span>
+            <li class="sidebar-item" :class="{ active: currentView === 'mrDescriptions' }">
+              <a class="sidebar-link" @click="currentView = 'mrDescriptions'" aria-expanded="false">
+                <i class="fa-solid fa-chart-line"></i>
+                <span class="hide-menu">MR Descriptions</span>
               </a>
             </li>
             <br>
@@ -66,7 +62,15 @@
           </div>
         </nav>
       </header>
-      <div class="container-fluid">
+      <div v-if="currentView === 'mrDescriptions'" class="mr-descriptions">
+        <h2>Metamorphic Relations Descriptions</h2>
+        <ul>
+          <li v-for="(description, index) in mrDescriptions" :key="index">
+            MR{{ index + 1 }}: {{ description }}
+          </li>
+        </ul>
+      </div>
+      <div class="container-fluid" v-if="currentView === 'dashboard'">
         <div class="row">
           <div class="col-lg-8 d-flex align-items-strech">
             <div class="card w-100">
@@ -142,7 +146,6 @@
               </div>
             </div>
           </div>
-
           <div class="col-lg-6 d-flex align-items-strech">
             <div class="card w-100">
               <div class="card-body chart-container">
@@ -240,7 +243,7 @@
       </div>
     </div>
   </div>
-  <div v-if="showFirstPopup" class="popup container">
+    <div v-if="showFirstPopup" class="popup container">
     <div class="row">
       <div class="insights-container col-md-4">
       <div class="insight">
@@ -271,7 +274,7 @@
   </div>
   <div v-if="showSecondPopup" class="popup">
     <div class="table-container">
-      <table>
+      <table class="table table-bordered">
         <tr>
           <th>
             Input Test Data
@@ -293,7 +296,7 @@
           <td>
             {{ item.input_testData }}
           </td>
-          <td v-for="columnName in columnsNames" :key="columnName">
+          <td v-for="columnName in columnsNames" :key="columnName" :title="item[columnName+'_Transformed']">
             {{ item[columnName+'_Transformed'] }}
           </td>
           <td>
@@ -318,10 +321,7 @@
                 {{ item[columnName+'_checker'] }}
               </span>
             </span>
-
           </td>
-         
-
         </tr>
       </table>
 
@@ -342,7 +342,6 @@
     </div>
   </div>
 </template>
-
 <script>
 import axios from 'axios';
 import Chart from 'chart.js/auto';
@@ -350,6 +349,7 @@ import Chart from 'chart.js/auto';
 export default {
   data() {
     return {
+      currentView: 'dashboard', 
       numberOfRows: 0,
       numberOfViolatedRows: 0,
       numberOfNotViolatedRows: 0,
@@ -363,6 +363,7 @@ export default {
       allColumns: [],
       selectedColumns: [],
       currentOffset: 0,
+      mrDescriptions: [],
       selectedFile: this.$route.query.selectedFile,
       chartData1: {
         labels: [],
@@ -473,6 +474,7 @@ export default {
     this.fetchChart6Data();
     this.fetchChart7Data();
     this.fetchInsights();
+    this.fetchMRDescriptions();
   },
   methods: {
     generateRandomColors(numColors) {
@@ -501,7 +503,6 @@ export default {
       } catch (error) {
         console.error('Error fetching chart data:', error);
       }
-  console.log(this.$route.query.numMRs);
     },
 
     async fetchChart2Data() {
@@ -814,8 +815,8 @@ export default {
         },
       });
     },
-
-    fetchInsights() {
+  
+  fetchInsights() {
     axios.get('http://127.0.0.1:8000/fetch_insights') 
       .then(response => {
         const insights = response.data.insights;
@@ -833,8 +834,7 @@ export default {
         console.error('Error fetching insights:', error);
       });
   },
-
-  fetchRandomData() {
+    fetchRandomData() {
       axios.get(`http://127.0.0.1:8000/fetch_random_data/?isViolated=${this.isViolated}`)
         .then(response => {
           console.log('Random data:', response.data)
@@ -856,27 +856,15 @@ export default {
           console.error('Error fetching more data:', error);
         });
     },
-
-
-
-
     onChartClick(data) {
       console.log('Chart clicked', this.isViolated);
       this.isViolated = data.isViolated;
-      if (data.chartData == "validation/non-validation") {
-        // this.columnsNames = [
-        //   'MR1_checker', 'MR2_checker', 'MR3_checker', 'MR4_checker', 'MR5_checker', 'MR6_checker',
-        //   'MR7_checker', 'MR8_checker'
-        // ];
-      } else {
-        this.columnsNames = data.chartData?.labels;
-      }
-      this.showFirstPopup = true;
+      this.columnsNames = data.chartData?.labels;
+      this.showFirstPopup = true; 
     },
 
-
     onProceedClick() {
-      this.showFirstPopup = false; 
+      this.showFirstPopup = false;
       this.fetchRandomData(); 
       this.updateColumns(); 
       this.showSecondPopup = true; 
@@ -884,183 +872,25 @@ export default {
     updateColumns() {
       this.columnsNames = [...this.selectedColumns];
       this.showColumnPopup = false;
-    }
-
-
-
+    },
+    fetchMRDescriptions() {
+      try {
+        const descriptions = this.$route.query.mrDescriptions ? (this.$route.query.mrDescriptions) : [];
+        this.mrDescriptions = descriptions;
+        console.log('MR descriptions fetched: ', this.mrDescriptions); 
+      } catch (error) {
+        console.error('Error parsing MR descriptions:', error);
+        this.mrDescriptions = [];
+      }
+},
   }
 };
 </script>
 
 <style scoped>
+@import url('@/assets/css/styles.css');
 @import url('@/assets/css/styles.min.css');
+@import url('@/assets/css/dashboard.css');
 @import url('https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css');
-
-canvas {
-  width: 100%;
-  height: 400px;
-}
-
-.chart-container {
-  width: 100%;
-  height: auto 400px;
-}
-
-.popup {
-  background-color: #ffffff;
-  border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1), 0 6px 20px rgba(0, 0, 0, 0.1);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-around;
-  height: 80vh;
-  width: 60vw;
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  padding: 20px;
-  overflow: hidden;
-  z-index: 1000;
-}
-
-.insights-container,
-.popup_filtering {
-  width: 100%;
-  margin-bottom: 20px;
-}
-
-.bottom-right {
-  background-color: #007BFF;
-  color: #ffffff;
-  border: none;
-  border-radius: 5px;
-  padding: 10px 20px;
-  margin: 10px auto;
-  display: block;
-  cursor: pointer;
-  font-size: 16px;
-  transition: background-color 0.3s, color 0.3s, border-color 0.3s;
-}
-
-.bottom-right:hover {
-  background-color: #0056b3;
-  color: #ffffff;
-  border: 1px solid #0056b3;
-}
-
-.table-container {
-  overflow-y: auto;
-  overflow-x: auto;
-  width: 100%;
-  height: 100%;
-  margin-top: 20px;
-  border: 1px solid #dee2e6;
-  border-radius: 5px;
-}
-
-.popup table {
-  width: 100%;
-  border-collapse: collapse;
-  background-color: #f8f9fa;
-}
-
-.popup th,
-.popup td {
-  padding: 12px 15px;
-  text-align: left;
-  border-bottom: 1px solid #dee2e6;
-}
-
-.popup th {
-  background-color: #007bff;
-  color: #ffffff;
-  font-weight: bold;
-}
-
-.popup tr:hover {
-  background-color: #f2f2f2;
-}
-
-.table-container::-webkit-scrollbar {
-  width: 6px;
-}
-
-.table-container::-webkit-scrollbar-track {
-  background: #f1f1f1;
-}
-
-.table-container::-webkit-scrollbar-thumb {
-  background: #888;
-}
-
-.table-container::-webkit-scrollbar-thumb:hover {
-  background: #555;
-}
-
-.insights-container {
-  background-color: #fff;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  padding: 20px;
-  max-width: 400px;
-  margin: auto;
-}
-
-.insight {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
-  padding: 10px;
-  background-color: #f9f9f9;
-  border-radius: 5px;
-}
-
-.insight label {
-  font-weight: bold;
-  color: #333;
-}
-
-.insight span {
-  background-color: #e7f5ff;
-  color: #0366d6;
-  padding: 5px 10px;
-  border-radius: 4px;
-  font-weight: bold;
-}
-
-.popup_filtering {
-  justify-content: center;
-  align-items: center;
-  margin-top: 40px;
-  padding: 15px;
-  border-radius: 8px;
-  background-color: #f8f9fa;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  padding-left: 320px;
-}
-
-.popup button {
-  height: 50px;
-  padding: 0 20px;
-  margin: 20px;
-  font-size: 16px;
-  color: #fff;
-  background-color: #007bff;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.popup_filtering > button:hover {
-  background-color: #0056b3;
-}
-
-.popup_filtering > button:focus {
-  outline: none;
-}
 
 </style>

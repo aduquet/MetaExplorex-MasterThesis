@@ -51,15 +51,15 @@
         <input v-model="numMRs" type="number" placeholder="Enter the number of MRs" class="form-control" :disabled="fileType === 'multiple'" required>
         <br>
         <div v-if="numMRs && numMRs > 0">
-            <div v-for="index in parseInt(numMRs)" :key="index">
-                <label :for="'mr-description-' + index">MR{{ index }} description:</label>
-                <input :id="'mr-description-' + index" type="text" v-model="mrDescriptions[index - 1]" class="form-control" :placeholder="'Description for MR' + index" required >
-            </div>
-        <br>
+          <div v-for="index in parseInt(numMRs)" :key="index">
+            <label :for="'mr-description-' + index">MR{{ index }} description:</label>
+            <input :id="'mr-description-' + index" type="text" v-model="mrDescriptions[index - 1]" class="form-control" :placeholder="'Description for MR' + index" required>
+          </div>
+          <br>
         </div>
         <label for="file">Choose Log file</label>
         <input type="file" name="file" id="file" accept=".csv" @change="onFileChange">
-        <router-link :to="{ path: '/dashboard', query: { numMRs: this.numMRs, fileType: this.fileType, selectedFile: this.selectedFile } }">
+        <router-link :to="{ path: '/dashboard', query: { numMRs: this.numMRs, fileType: this.fileType, selectedFile: this.selectedFile, mrDescriptions: this.mrDescriptions } }">
         <button type="submit" class="btn btn-primary float-right" id="upload-button">Proceed</button>
         </router-link>
       </form>
@@ -98,6 +98,7 @@ export default {
     numMRs(newValue, oldValue) {
       if (newValue !== oldValue) {
         this.mrDescriptions = Array.from({ length: newValue }, () => '');
+        console.log('MR Descriptions after numMRs change:', this.mrDescriptions);
       }
     },
      sampleFileType(newValue) {
@@ -122,6 +123,7 @@ export default {
         formData.append('file', this.selectedFile);
         formData.append('num_mrs', this.numMRs);
         formData.append('file_type', this.fileType);
+        formData.append('mr_descriptions', this.mrDescriptions);
         axios.post('http://127.0.0.1:8000/process_chart_data/', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
@@ -135,9 +137,11 @@ export default {
                 query: { 
                     numMRs: this.numMRs, 
                     fileType: this.fileType, 
-                    selectedFile: this.selectedFile.name 
-                } 
+                    selectedFile: this.selectedFile.name,
+                    mrDescriptions: JSON.stringify(this.mrDescriptions)
+                }
             });
+        console.log('MR Desc:', this.mrDescriptions);
         })
         .catch(error => {
             console.error(error);
@@ -187,9 +191,9 @@ export default {
 computed: {
   isSampleFormValid() {
     return this.sampleFileType && this.sampleNumMRs && (this.sampleFileType !== 'multiple' || this.sampleNumMRs === 1);
-  },
+ },
+  
 },
-
 };
 </script>
 
