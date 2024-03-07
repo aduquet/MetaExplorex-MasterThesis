@@ -10,6 +10,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from django.shortcuts import render
+import json
 
 @api_view(['GET'])
 def dashboard(request, *args, **kwargs):
@@ -20,7 +21,20 @@ def dashboard(request, *args, **kwargs):
     print("values: ", num_mrs, file_type, selected_file)
     return JsonResponse({'message': 'Data received successfully.'})
 
-    
+def convert_json_to_csv_if_needed(file_path):
+    print("Function called with file_path:", file_path)  
+    if file_path.endswith('.json'):
+        try:
+            df = pd.read_json(file_path, lines=True)
+            csv_file_path = file_path.replace('.json', '.csv')
+            df.to_csv(csv_file_path, index=False)  
+            return csv_file_path
+        except Exception as e:
+            print("Error converting JSON to CSV:", e)
+            return None
+    else:
+        return file_path
+
 @api_view(['GET', 'POST'])
 def process_chart_data(request, get_chart_data_func):
     try:
@@ -33,7 +47,8 @@ def process_chart_data(request, get_chart_data_func):
             return Response({'error': 'Number of MRs is missing.'}, status=status.HTTP_400_BAD_REQUEST)
         
         # uploaded_file = request.data.get('file')
-        uploaded_file = '../metaexplorex/expanded_test.csv'
+        uploaded_file_path = '../metaexplorex/expanded_test.json'
+        uploaded_file = convert_json_to_csv_if_needed(uploaded_file_path)
         print("2", num_mrs, file_type, uploaded_file)
         if not uploaded_file:
             return Response({'error': 'No file uploaded.'}, status=status.HTTP_400_BAD_REQUEST)
@@ -88,7 +103,7 @@ def chart_data7_api(request):
 @api_view(['GET'])
 def fetch_random_data_api(request):
     try:
-        uploaded_file = '../metaexplorex/expanded_test.csv'
+        uploaded_file = convert_json_to_csv_if_needed('../metaexplorex/expanded_test.json')
         log_csv = pd.read_csv(uploaded_file, low_memory=False)
         offset = int(request.query_params.get('offset', 0))
         random_data = fetchRandomData(log_csv, offset=offset)
@@ -101,7 +116,7 @@ def fetch_random_data_api(request):
 @api_view(["GET"])
 def fetch_insights_api(request):
     try:
-        uploaded_file = '../metaexplorex/expanded_test.csv'
+        uploaded_file = convert_json_to_csv_if_needed('../metaexplorex/expanded_test.json')
         log_csv = pd.read_csv(uploaded_file, low_memory=False)
         insights = fetchInsights(log_csv)
         return JsonResponse({'insights': insights})
@@ -134,6 +149,7 @@ def get_chart_data(log_csv):
     input_test_columns = log_csv.filter(like='input_testData').columns
     output_testInput_columns = log_csv.filter(like='output_testInput').columns
     rule_violations = log_csv[checker_columns].apply(lambda x: (x == 'Violated').sum())
+    print("first 5 rows: ", checker_columns, rule_violations)
 
     violated_checker_columns = checker_columns[log_csv[checker_columns].eq('Violated').any()]
     input_testData_with_violations = log_csv[input_test_columns].loc[log_csv[violated_checker_columns].eq('Violated').any(axis=1)].values.tolist()
