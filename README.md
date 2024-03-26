@@ -15,5 +15,6 @@ pip install -r requirements.txt  ## Install all the dependencies from requiremen
 python manage.py runserver
 ```
 
+To run the tests just run `python manage.py test` command in main directory. 
 ## Both apps should be run together for full functionality of the project.
 ### Docker will be configured soon
